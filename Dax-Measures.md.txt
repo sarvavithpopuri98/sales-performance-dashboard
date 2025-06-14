@@ -1,0 +1,43 @@
+-- Total Sales
+Total Sales = SUM('Sales_Data'[Sales_Amount])
+
+-- Total Quantity Sold
+Total Quantity Sold = SUM('Sales_Data'[Quantity_Sold])
+
+-- Average Order Value
+Average Order Value = 
+DIVIDE([Total Sales], [Total Quantity Sold])
+
+-- Total Discount Given
+Total Discount = SUMX('Sales_Data', 'Sales_Data'[Sales_Amount] * 'Sales_Data'[Discount])
+
+-- Sales After Discount
+Sales After Discount = 
+SUMX('Sales_Data', 
+     'Sales_Data'[Sales_Amount] * (1 - 'Sales_Data'[Discount])
+)
+
+-- Sales by Region
+Sales by Region = 
+CALCULATE([Total Sales], ALLEXCEPT('Sales_Data', 'Sales_Data'[Region]))
+
+-- Sales Growth (Monthly or YoY as needed)
+Sales Growth = 
+VAR CurrentMonth = CALCULATE([Total Sales], 
+    FILTER(ALL('Sales_Data'), 
+    MONTH('Sales_Data'[Sale_Date]) = MONTH(TODAY()) &&
+    YEAR('Sales_Data'[Sale_Date]) = YEAR(TODAY()))
+)
+VAR PreviousMonth = CALCULATE([Total Sales], 
+    FILTER(ALL('Sales_Data'), 
+    MONTH('Sales_Data'[Sale_Date]) = MONTH(TODAY()) - 1 &&
+    YEAR('Sales_Data'[Sale_Date]) = YEAR(TODAY()))
+)
+RETURN DIVIDE(CurrentMonth - PreviousMonth, PreviousMonth)
+
+-- Customer Type Breakdown
+New Customer Sales = 
+CALCULATE([Total Sales], 'Sales_Data'[Customer_Type] = "New")
+
+Returning Customer Sales = 
+CALCULATE([Total Sales], 'Sales_Data'[Customer_Type] = "Returning")
